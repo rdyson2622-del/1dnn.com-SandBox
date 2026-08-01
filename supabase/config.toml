@@ -1,0 +1,13 @@
+project_id = "1dnn-sandbox"
+
+[functions.dnnNationalSourcePull]
+verify_jwt = false
+
+[functions.dnnDailyArticle]
+verify_jwt = false
+
+[functions.dnnArticleCleanup]
+verify_jwt = false
+
+[functions.dnnSubscribe]
+verify_jwt = false

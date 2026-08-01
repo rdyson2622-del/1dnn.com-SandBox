@@ -1,0 +1,62 @@
+-- Run this once in the Supabase SQL editor after replacing all three values.
+-- The jobs run hourly but only fire at the requested America/Los_Angeles hour,
+-- so daylight-saving changes do not move the public publishing time.
+
+create extension if not exists pg_cron with schema pg_catalog;
+create extension if not exists pg_net with schema extensions;
+create extension if not exists supabase_vault with schema vault;
+
+select vault.create_secret('https://YOUR_PROJECT_REF.supabase.co', 'dnn_project_url');
+select vault.create_secret('YOUR_SUPABASE_PUBLISHABLE_KEY', 'dnn_publishable_key');
+select vault.create_secret('GENERATE_A_LONG_RANDOM_SECRET', 'dnn_cron_secret');
+
+select cron.schedule(
+  'dnn-national-source-pull',
+  '0 * * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_project_url') || '/functions/v1/dnnNationalSourcePull',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_publishable_key'),
+      'x-dnn-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_cron_secret')
+    ),
+    body := '{"count":5}'::jsonb
+  )
+  where extract(hour from now() at time zone 'America/Los_Angeles') = 6;
+  $$
+);
+
+select cron.schedule(
+  'dnn-local-market-briefs',
+  '0 * * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_project_url') || '/functions/v1/dnnDailyArticle',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_publishable_key'),
+      'x-dnn-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_cron_secret')
+    ),
+    body := '{"count":10}'::jsonb
+  )
+  where extract(hour from now() at time zone 'America/Los_Angeles') = 7;
+  $$
+);
+
+select cron.schedule(
+  'dnn-article-cleanup',
+  '0 * * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_project_url') || '/functions/v1/dnnArticleCleanup',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_publishable_key'),
+      'x-dnn-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'dnn_cron_secret')
+    ),
+    body := '{}'::jsonb
+  )
+  where extract(hour from now() at time zone 'America/Los_Angeles') = 3;
+  $$
+);
