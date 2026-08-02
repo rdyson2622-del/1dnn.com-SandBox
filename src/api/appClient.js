@@ -208,7 +208,10 @@ export const appClient = {
   functions: { invoke: invokeFunction },
   integrations: {
     Core: {
-      InvokeLLM: (body) => invokeFunction('invoke-llm', body),
+      async InvokeLLM(body) {
+        const result = await invokeFunction('invoke-llm', body);
+        return result?.data ?? result;
+      },
       SendEmail: (body) => invokeFunction('send-email', body),
       async UploadFile({ file }) {
         if (!supabase) return { file_url: URL.createObjectURL(file) };
