@@ -46,7 +46,7 @@ export default function FloatingCharlie() {
       {/* Floating button */}
       {!expanded && (
         <motion.div
-          className="fixed bottom-6 right-6 z-50"
+          className="fixed bottom-20 right-3 md:bottom-6 md:right-6 z-[60]"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
@@ -55,7 +55,7 @@ export default function FloatingCharlie() {
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-sm px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg"
+                className="hidden sm:block absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-sm px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg"
               >
                 Meet Charlie — your site guide 👋
                 <div className="absolute top-1/2 -translate-y-1/2 right-[-6px] w-3 h-3 bg-slate-900 rotate-45" />
@@ -65,7 +65,7 @@ export default function FloatingCharlie() {
               onClick={() => setIsOpen(!isOpen)}
               className="block"
             >
-              <img src={DYSON_LOGO} alt="Dyson & Dyson" className="h-16 w-auto" />
+              <img src={DYSON_LOGO} alt="Dyson & Dyson" className="h-12 md:h-16 w-auto" />
             </button>
           </div>
         </motion.div>

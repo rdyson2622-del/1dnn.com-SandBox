@@ -62,7 +62,7 @@ export default function PWAInstallPrompt() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-6 right-6 max-w-sm z-40"
+        className="fixed bottom-20 right-3 left-3 sm:left-auto md:bottom-6 md:right-6 max-w-sm z-[60]"
       >
         <div
           className="rounded-2xl p-5 shadow-lg"

@@ -56,8 +56,10 @@ export default function AppLayout() {
         <button
           onClick={toggleSidebar}
           aria-label="Toggle portal menu"
+          aria-expanded={sidebarOpen}
+          aria-controls="client-portal-menu"
           title="Toggle portal menu"
-          className="w-9 h-9 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
+          className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
           style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.35)' }}
         >
           <PanelLeft className="w-4 h-4" />
@@ -65,7 +67,7 @@ export default function AppLayout() {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full transition-all hover:opacity-80"
+          className="min-h-11 md:min-h-0 flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full transition-all hover:opacity-80"
           style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}
         >
           <ArrowLeft className="w-4 h-4" /> Back
@@ -78,10 +80,31 @@ export default function AppLayout() {
       </div>
       {/* Content area with sidebar */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar — desktop only, toggled by the Client Portal box */}
+        {/* Left sidebar — desktop */}
         {sidebarOpen && (
           <div className="hidden md:flex">
             <ClientSidebar />
+          </div>
+        )}
+
+        {/* Mobile portal drawer. Links close it after navigation; tapping the
+            shaded backdrop closes it without changing pages. */}
+        {sidebarOpen && (
+          <div
+            id="client-portal-menu"
+            className="md:hidden fixed inset-0 z-[70]"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/65" />
+            <div
+              className="relative h-full w-56 max-w-[85vw]"
+              onClick={(event) => {
+                event.stopPropagation();
+                if (event.target.closest('a')) setSidebarOpen(false);
+              }}
+            >
+              <ClientSidebar />
+            </div>
           </div>
         )}
         {/* Main content */}

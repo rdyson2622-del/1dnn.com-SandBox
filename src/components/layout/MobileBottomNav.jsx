@@ -32,7 +32,7 @@ export default function MobileBottomNav() {
           <Link
             key={path}
             to={path}
-            className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl"
+            className="min-w-14 min-h-11 flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-xl"
             style={{ color: active ? GOLD : 'rgba(255,255,255,0.45)' }}
           >
             <Icon className="w-5 h-5" style={{ strokeWidth: active ? 2.5 : 1.8 }} />
