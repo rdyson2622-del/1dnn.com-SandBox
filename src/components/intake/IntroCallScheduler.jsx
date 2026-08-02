@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Phone, Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import { appClient } from '@/api/appClient';
 
 const GOLD = '#D4AF37';
 
@@ -31,20 +32,52 @@ const TIME_SLOTS = [
   '4:00 PM', '4:30 PM',
 ];
 
-export default function IntroCallScheduler({ form, onBack, onScheduled }) {
+export default function IntroCallScheduler({ form = {}, onBack, onScheduled, standalone = false }) {
   const DAYS = getAvailableDays();
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [notificationSent, setNotificationSent] = useState(false);
+  const [contact, setContact] = useState({
+    full_name: form.full_name || '',
+    email: form.email || '',
+    phone: form.phone || '',
+  });
 
-  const canConfirm = selectedDay && selectedTime;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim());
+  const canConfirm = selectedDay && selectedTime
+    && contact.full_name.trim() && emailValid && contact.phone.trim();
 
-  const handleConfirm = () => {
-    setConfirmed(true);
-    // Brief delay then advance
-    setTimeout(() => {
-      onScheduled({ day: selectedDay, time: selectedTime });
-    }, 1800);
+  const handleConfirm = async () => {
+    if (!canConfirm || submitting) return;
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const response = await appClient.functions.invoke('scheduleIntroCall', {
+        ...contact,
+        day: selectedDay,
+        time: selectedTime,
+        destination_city: form.destination_city || '',
+        source: standalone ? 'charlie_session_link' : 'relocation_intake',
+      });
+      const result = response?.data ?? response;
+      if (!result?.success) throw new Error(result?.error || 'The call could not be scheduled.');
+
+      setNotificationSent(Boolean(result.notification_sent));
+      setConfirmed(true);
+      if (!standalone) {
+        setTimeout(() => {
+          onScheduled?.({ day: selectedDay, time: selectedTime, ...contact });
+        }, 1800);
+      }
+    } catch (bookingError) {
+      setError(bookingError?.message || 'The call could not be scheduled. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (confirmed) {
@@ -61,7 +94,16 @@ export default function IntroCallScheduler({ form, onBack, onScheduled }) {
         </div>
         <h2 className="font-bold mb-2" style={{ color: '#fff', fontSize: '1.5rem' }}>Call Scheduled!</h2>
         <p className="mb-1" style={{ color: GOLD, fontSize: '1rem' }}>{selectedDay.label} at {selectedTime} (Pacific)</p>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>Moving to service agreement...</p>
+        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.875rem' }}>
+          {notificationSent
+            ? `Bob has been notified at rdyson2622@gmail.com. He'll call ${contact.phone}.`
+            : `Your request is saved. Please also call Bob at (858) 353-1200 to confirm.`}
+        </p>
+        {!standalone && (
+          <p className="mt-2" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+            Moving to the service agreement...
+          </p>
+        )}
       </motion.div>
     );
   }
@@ -77,6 +119,39 @@ export default function IntroCallScheduler({ form, onBack, onScheduled }) {
       <div className="flex items-center gap-3 mb-2">
         <Phone className="w-6 h-6" style={{ color: GOLD }} />
         <h2 className="font-bold" style={{ color: '#fff', fontSize: '2rem' }}>Let's Talk First</h2>
+      </div>
+
+      {/* Callback details */}
+      <div className="mb-6">
+        <p className="font-bold tracking-wider mb-3" style={{ color: GOLD, fontSize: '0.875rem' }}>YOUR CALLBACK DETAILS</p>
+        <div className="grid gap-3">
+          <input
+            value={contact.full_name}
+            onChange={(event) => setContact(current => ({ ...current, full_name: event.target.value }))}
+            placeholder="Full name"
+            autoComplete="name"
+            className="w-full rounded-xl px-4 py-3"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+          />
+          <input
+            type="email"
+            value={contact.email}
+            onChange={(event) => setContact(current => ({ ...current, email: event.target.value }))}
+            placeholder="Email address"
+            autoComplete="email"
+            className="w-full rounded-xl px-4 py-3"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+          />
+          <input
+            type="tel"
+            value={contact.phone}
+            onChange={(event) => setContact(current => ({ ...current, phone: event.target.value }))}
+            placeholder="Phone number"
+            autoComplete="tel"
+            className="w-full rounded-xl px-4 py-3"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+          />
+        </div>
       </div>
       <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem' }}>
         Before you commit to anything, let's have a real conversation. Pick a 15-minute slot — Bob Dyson will call you personally.
@@ -158,20 +233,28 @@ export default function IntroCallScheduler({ form, onBack, onScheduled }) {
 
         <button
           onClick={handleConfirm}
-          disabled={!canConfirm}
+          disabled={!canConfirm || submitting}
           className="gold-btn px-7 py-2.5 rounded-full font-bold tracking-wide flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ fontSize: '1rem' }}
         >
-          Confirm Call <ArrowRight className="w-4 h-4" />
+          {submitting ? 'Scheduling...' : 'Confirm Call'} {!submitting && <ArrowRight className="w-4 h-4" />}
         </button>
       </div>
 
-      <p className="text-center mt-4" style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.875rem' }}>
-        You can still skip ahead to the service agreement if you prefer.{' '}
-        <button onClick={() => onScheduled(null)} className="underline hover:opacity-70" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          Skip for now
-        </button>
-      </p>
+      {error && (
+        <p role="alert" className="text-center mt-4 text-sm" style={{ color: '#fca5a5' }}>
+          {error} You can call Bob directly at (858) 353-1200.
+        </p>
+      )}
+
+      {!standalone && (
+        <p className="text-center mt-4" style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.875rem' }}>
+          You can still skip ahead to the service agreement if you prefer.{' '}
+          <button onClick={() => onScheduled?.(null)} className="underline hover:opacity-70" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            Skip for now
+          </button>
+        </p>
+      )}
     </motion.div>
   );
 }

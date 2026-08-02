@@ -64,6 +64,7 @@ export default function RelocationIntake() {
   const [agreedItems, setAgreedItems] = useState([]);
   const [signTiming, setSignTiming] = useState(null); // 'now' or 'after'
   const [scheduledCall, setScheduledCall] = useState(null);
+  const [submitError, setSubmitError] = useState('');
 
   const [form, setForm] = useState({
     full_name: '',
@@ -108,50 +109,22 @@ export default function RelocationIntake() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError('');
     try {
-      // Create RelocationClient record
-      await appClient.entities.RelocationClient.create({
-        full_name: form.full_name,
-        email: form.email,
-        phone: form.phone,
-        current_city: form.current_city,
-        destination_city: form.destination_city,
-        move_date: form.move_date === 'asap' ? '' : form.move_date,
-        budget: form.budget,
-        family_size: form.family_size ? parseInt(form.family_size) : undefined,
-        priorities: form.priorities.map(p => p.toLowerCase().replace(' ', '_')),
-        notes: form.notes,
-        status: 'in_consultation',
+      const response = await appClient.functions.invoke('submitRelocationIntake', {
+        form,
+        scheduled_call: scheduledCall,
+        sign_timing: signTiming || 'now',
       });
-
-      // Capture OptIn for real-time tracking
-      await appClient.entities.OptIn.create({
-        email: form.email,
-        phone: form.phone || undefined,
-        full_name: form.full_name,
-        source: 'relocation_intake',
-        opted_in_at: new Date().toISOString(),
-        initial_data: {
-          destination_city: form.destination_city,
-          move_date: form.move_date,
-          budget: form.budget,
-          priorities: form.priorities,
-          family_size: form.family_size,
-        },
-        status: 'new',
-      });
-
-      appClient.integrations.Core.SendEmail({
-        to: 'bob@dysonconcierge.com',
-        subject: `New Relocation Intake: ${form.full_name} → ${form.destination_city}`,
-        body: `New client intake submitted:\n\nName: ${form.full_name}\nEmail: ${form.email}\nPhone: ${form.phone}\nFrom: ${form.current_city}\nTo: ${form.destination_city}\nTimeline: ${form.move_date}\nBudget: ${form.budget}\nFamily Size: ${form.family_size}\nPriorities: ${form.priorities.join(', ')}\nNotes: ${form.notes}\n\nAGENT PREFERENCES: ${form.agent_preferences}\nPROPERTY CRITERIA: ${form.property_preferences}\nNEIGHBORHOOD NOTES: ${form.neighborhood_notes}\nDUE DILIGENCE: ${form.due_diligence_notes}\n\nINTRO CALL: ${scheduledCall ? `${scheduledCall.day?.label} at ${scheduledCall.time} (Pacific)` : 'Scheduled'}`,
-      }).catch(() => {});
+      const result = response?.data ?? response;
+      if (!result?.success) throw new Error(result?.error || 'The agreement could not be saved.');
 
       setSubmitting(false);
       navigate('/RelocationRoadmap?name=' + encodeURIComponent(form.full_name) + '&destination=' + encodeURIComponent(form.destination_city));
     } catch (e) {
       console.error('Intake submit error:', e);
       setSubmitting(false);
+      setSubmitError('We could not save your agreement. Please try again or call Bob at (858) 353-1200.');
     }
   };
 
@@ -230,35 +203,7 @@ export default function RelocationIntake() {
             We'll send you the service agreement and a thank you message after your call. For now, head to your roadmap to get started.
           </p>
           <button
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await appClient.entities.RelocationClient.create({
-                  full_name: form.full_name,
-                  email: form.email,
-                  phone: form.phone,
-                  current_city: form.current_city,
-                  destination_city: form.destination_city,
-                  move_date: form.move_date === 'asap' ? '' : form.move_date,
-                  budget: form.budget,
-                  family_size: form.family_size ? parseInt(form.family_size) : undefined,
-                  priorities: form.priorities.map(p => p.toLowerCase().replace(' ', '_')),
-                  notes: form.notes,
-                  status: 'in_consultation',
-                });
-                appClient.integrations.Core.SendEmail({
-                  to: 'bob@dysonconcierge.com',
-                  subject: `New Relocation Intake: ${form.full_name} → ${form.destination_city}`,
-                  body: `New client intake submitted (signing after call):\n\nName: ${form.full_name}\nEmail: ${form.email}\nPhone: ${form.phone}\nFrom: ${form.current_city}\nTo: ${form.destination_city}\nTimeline: ${form.move_date}\nBudget: ${form.budget}\nFamily Size: ${form.family_size}\nPriorities: ${form.priorities.join(', ')}\nNotes: ${form.notes}\n\nINTRO CALL: ${scheduledCall ? `${scheduledCall.day?.label} at ${scheduledCall.time} (Pacific)` : 'Scheduled'}\n\nCLIENT PREFERENCE: Will sign agreement after call.`,
-                }).catch(() => {});
-              } catch (e) {
-                console.error('Intake submit error:', e);
-                setSubmitting(false);
-                return;
-              }
-              setSubmitting(false);
-              navigate('/RelocationRoadmap?name=' + encodeURIComponent(form.full_name) + '&destination=' + encodeURIComponent(form.destination_city));
-            }}
+            onClick={handleSubmit}
             disabled={submitting}
             className="w-full py-3 rounded-full text-sm font-bold tracking-wide gold-btn disabled:opacity-50"
           >
@@ -348,6 +293,12 @@ export default function RelocationIntake() {
               {allAgreed && <Zap className="w-4 h-4" />}
             </button>
 
+            {submitError && (
+              <p role="alert" className="text-sm text-center mt-4" style={{ color: '#fca5a5' }}>
+                {submitError}
+              </p>
+            )}
+
             <p className="text-xs text-center mt-4" style={{ color: 'rgba(255,255,255,0.3)' }}>
               By proceeding you agree to Dyson & Dyson's terms of service and privacy policy.
             </p>
@@ -378,6 +329,7 @@ export default function RelocationIntake() {
           </motion.div>
           <IntroCallScheduler
             form={form}
+            standalone={openBookingCalendar}
             onBack={() => setShowScheduler(false)}
             onScheduled={(callInfo) => {
               setScheduledCall(callInfo);
