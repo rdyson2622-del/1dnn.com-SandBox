@@ -4,15 +4,28 @@ import { appClient, supabase } from '@/api/appClient';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function Login() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) return <Navigate to={user?.role === 'admin' ? '/admin' : '/'} replace />;
 
   const submit = async (event) => {
     event.preventDefault();
+    setBusy(true);
+    setMessage('');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) setMessage(error.message);
+  };
+
+  const sendMagicLink = async () => {
+    if (!email.trim()) {
+      setMessage('Enter your email address first.');
+      return;
+    }
     setBusy(true);
     setMessage('');
     const redirectTo = `${window.location.origin}/login`;
@@ -38,8 +51,26 @@ export default function Login() {
               className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-amber-400"
             />
           </label>
+          <label className="block text-sm">
+            Password
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-amber-400"
+            />
+          </label>
           <button disabled={busy} className="w-full rounded-lg bg-amber-400 px-4 py-3 font-semibold text-black disabled:opacity-50">
-            {busy ? 'Sending…' : 'Email me a sign-in link'}
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={sendMagicLink}
+            className="w-full rounded-lg border border-amber-400/40 px-4 py-3 font-semibold text-amber-300 disabled:opacity-50"
+          >
+            Email me a sign-in link instead
           </button>
         </form>
         {message && <p className="mt-4 text-sm text-center text-zinc-300">{message}</p>}
