@@ -109,6 +109,9 @@ export default function RelocationIntakeForm({ clientInfo, onComplete }) {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    if (form.destination_city) {
+      localStorage.setItem('dnn_destination_market', `${form.destination_city.trim()}${form.destination_state ? `, ${form.destination_state.trim()}` : ''}`);
+    }
 
     // Save to RelocationClient entity
     await appClient.entities.RelocationClient.create({

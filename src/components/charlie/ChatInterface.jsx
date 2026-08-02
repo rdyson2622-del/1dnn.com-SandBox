@@ -156,6 +156,9 @@ export default function ChatInterface({ expanded = false, onToggleExpand, onClos
   const handleOnboardingComplete = (completedProfile) => {
     setProfile(completedProfile);
     setTab('plan');
+    if (completedProfile.destination_city) {
+      localStorage.setItem('dnn_destination_market', completedProfile.destination_city.trim());
+    }
     // Save to RelocationClient entity
     appClient.entities.RelocationClient.create({
       full_name: 'New Client',

@@ -12,6 +12,86 @@ const article = (id, data, createdAt = seededAt) => ({
 // Supabase project is connected. Once any local record is changed, the browser
 // stores its own copy and these defaults are no longer reapplied.
 export const DNN_LOCAL_SEED_RECORDS = [
+  article('dnn-live-san-diego', {
+    headline: 'San Diego Office Market Gains Momentum Amid Corporate Expansion Trends',
+    dateline: 'SAN DIEGO —',
+    body: 'The San Diego office market recorded positive net absorption of 276,048 square feet in the first quarter of 2026, signaling a robust recovery in regional demand. Technology, defense, and healthcare employers continue to anchor the local economy, while expansion along the Interstate 15 corridor adds pressure to nearby residential inventory.',
+    tags: ['san diego', 'real estate', 'corporate relocation', 'market trends'],
+    trigger_type: 'employer_news', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:02:26.515Z', published_date: '2026-08-01T14:02:26.515Z',
+  }, '2026-08-01T14:02:26.515Z'),
+  article('dnn-live-boise', {
+    headline: 'Boise Metro Population Surges Past 845,000 Amid Sustained Regional Influx',
+    dateline: 'BOISE —',
+    body: 'The Boise City metropolitan area reached a population of 845,900 in 2024, marking a 36.9 percent increase since 2010. The Treasure Valley continues to attract residents from California and Washington, tightening housing inventory and reinforcing long-term demand across the region.',
+    tags: ['boise', 'real estate', 'migration', 'demographics', 'treasure valley'],
+    trigger_type: 'migration_data', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:02:17.906Z', published_date: '2026-08-01T14:02:17.906Z',
+  }, '2026-08-01T14:02:17.906Z'),
+  article('dnn-live-miami', {
+    headline: 'Miami Real Estate Market Shows Price Divergence Amid Rising Inventory Levels',
+    dateline: 'MIAMI —',
+    body: 'Miami housing data shows a widening split between scarce luxury single-family properties and expanding condo inventory. Buyers relocating to South Florida need neighborhood- and building-level analysis because citywide averages can hide materially different supply, insurance, and ownership-cost conditions.',
+    tags: ['miami', 'real estate', 'market trends', 'luxury property'],
+    trigger_type: 'housing_market', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:02:08.980Z', published_date: '2026-08-01T14:02:08.980Z',
+  }, '2026-08-01T14:02:08.980Z'),
+  article('dnn-live-san-francisco', {
+    headline: 'San Francisco Office Vacancy Rates Reach Thirty Six Percent Amid Hybrid Shift',
+    dateline: 'SAN FRANCISCO —',
+    body: 'San Francisco office vacancy remains elevated as technology employers recalibrate their footprints around remote and hybrid work. The shift creates a mixed relocation market in which return-to-office policies, transit access, and flexible living arrangements increasingly influence residential decisions.',
+    tags: ['san francisco', 'real estate', 'remote work', 'market trends'],
+    trigger_type: 'job_market', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:02:00.207Z', published_date: '2026-08-01T14:02:00.207Z',
+  }, '2026-08-01T14:02:00.207Z'),
+  article('dnn-live-tampa', {
+    headline: 'Tampa Homeowners Face Pivotal Tax Reform Vote This November',
+    dateline: 'TAMPA —',
+    body: 'A proposed expansion of Florida homestead exemptions could materially change long-term carrying costs for primary residences in the Tampa area. Relocating families should follow the vote and compare its potential savings with the effect on local services and municipal revenue.',
+    tags: ['tampa', 'real estate', 'tax policy', 'homestead exemption'],
+    trigger_type: 'tax_policy', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:50.611Z', published_date: '2026-08-01T14:01:50.611Z',
+  }, '2026-08-01T14:01:50.611Z'),
+  article('dnn-live-raleigh', {
+    headline: 'Raleigh Home Prices Moderate as Federal Reserve Maintains Restrictive Policy Stance',
+    dateline: 'RALEIGH —',
+    body: 'Raleigh home prices are moderating while borrowing costs continue to temper urgency. The market remains a major relocation destination, but buyers now need financing readiness and a clear understanding of total monthly cost to use their increased negotiating room effectively.',
+    tags: ['raleigh', 'real estate', 'mortgage rates', 'federal reserve', 'market analysis'],
+    trigger_type: 'interest_rates', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:40.199Z', published_date: '2026-08-01T14:01:40.199Z',
+  }, '2026-08-01T14:01:40.199Z'),
+  article('dnn-live-nashville', {
+    headline: 'Nashville Secures Top National Ranking for Corporate Headquarters Relocations',
+    dateline: 'NASHVILLE —',
+    body: 'Nashville remains a leading destination for corporate headquarters and Class A office activity. Major employer investment is supporting high-wage job growth while increasing competition for residential inventory near emerging corporate corridors.',
+    tags: ['nashville', 'real estate', 'corporate relocation', 'market intelligence'],
+    trigger_type: 'employer_news', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:31.341Z', published_date: '2026-08-01T14:01:31.341Z',
+  }, '2026-08-01T14:01:31.341Z'),
+  article('dnn-live-charlotte', {
+    headline: 'Charlotte Ranks Among Top Five National Metros for Population Growth',
+    dateline: 'CHARLOTTE —',
+    body: 'Charlotte continues to rank among the fastest-growing large metropolitan areas in the country. Its expanding professional population supports housing demand, but relocating households should compare submarkets carefully as commute patterns and inventory vary widely across the region.',
+    tags: ['charlotte', 'real estate', 'demographics', 'migration', 'market analysis'],
+    trigger_type: 'migration_data', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:23.108Z', published_date: '2026-08-01T14:01:23.108Z',
+  }, '2026-08-01T14:01:23.108Z'),
+  article('dnn-live-austin', {
+    headline: 'Austin Housing Market Recalibrates With Median Prices Near 542,000 Dollars',
+    dateline: 'AUSTIN —',
+    body: 'Austin is moving from seller-dominated volatility toward a more balanced market. Greater inventory gives relocating buyers more leverage, while property selection and neighborhood-level fundamentals remain critical to long-term value.',
+    tags: ['austin', 'real estate', 'market trends', 'housing inventory'],
+    trigger_type: 'housing_market', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:14.193Z', published_date: '2026-08-01T14:01:14.193Z',
+  }, '2026-08-01T14:01:14.193Z'),
+  article('dnn-live-phoenix', {
+    headline: 'Phoenix Emerges as Corporate Headquarters Hub Amidst Shifting Workforce Dynamics',
+    dateline: 'PHOENIX —',
+    body: 'Phoenix continues to attract headquarters relocations and major campus development. Corporate growth is bringing new talent and investment into the Valley, linking employment centers more closely to residential demand and relocation timing.',
+    tags: ['phoenix', 'real estate', 'corporate relocation', 'market trends'],
+    trigger_type: 'job_market', scope: 'local', audience: 'all', status: 'published', production_status: 'none',
+    generated_date: '2026-08-01T14:01:01.804Z', published_date: '2026-08-01T14:01:01.804Z',
+  }, '2026-08-01T14:01:01.804Z'),
   article('dnn-local-fema-brief', {
     headline: 'FEMA Risk Rating 2.0 Triggers Nationwide Participation Decline Amid Map Expansions',
     dateline: 'WASHINGTON —',
@@ -86,3 +166,5 @@ export const DNN_LOCAL_SEED_RECORDS = [
     published_date: '2026-07-30T15:28:30.036Z',
   }, '2026-07-30T15:28:30.036Z'),
 ];
+
+export const DNN_REVIEW_FEED_ITEMS = DNN_LOCAL_SEED_RECORDS.map(({ data }) => data);

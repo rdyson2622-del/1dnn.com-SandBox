@@ -119,6 +119,7 @@ export default function RelocationIntake() {
       const result = response?.data ?? response;
       if (!result?.success) throw new Error(result?.error || 'The agreement could not be saved.');
 
+      localStorage.setItem('dnn_destination_market', form.destination_city.trim());
       setSubmitting(false);
       navigate('/RelocationRoadmap?name=' + encodeURIComponent(form.full_name) + '&destination=' + encodeURIComponent(form.destination_city));
     } catch (e) {

@@ -4,11 +4,14 @@ import { appClient } from '@/api/appClient';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCw, Send, Trash2, Eye, EyeOff, CheckCircle, Clock, Globe, Pencil, Save, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { DNN_REVIEW_FEED_ITEMS } from '@/data/dnnSeedRecords';
 
 const DYSON_VOICE = `You are the DNN Intelligence Bureau — the editorial arm of Dyson & Dyson Real Estate Concierge. Write in the "1927 Parallel" style: authoritative, sophisticated, slightly cinematic. Think a trusted financial journalist who appreciates the drama of the American migration story. No fluff. No clickbait. Lead with the data, end with the implication for a homeowner considering a move. Each brief: 3-4 short paragraphs, under 300 words. Author: "DNN Intelligence Bureau" — no external source links or bylines visible.`;
 
 export default function DnnNewsFeed() {
   const [generating, setGenerating] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [generationError, setGenerationError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [blastModal, setBlastModal] = useState(null); // article to blast
   const [blasting, setBlasting] = useState(false);
@@ -33,7 +36,9 @@ export default function DnnNewsFeed() {
 
   const handleGenerate = async () => {
     setGenerating(true);
-    const res = await appClient.integrations.Core.InvokeLLM({
+    setGenerationError('');
+    try {
+      const request = appClient.integrations.Core.InvokeLLM({
       prompt: `${DYSON_VOICE}
 
 Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
@@ -71,22 +76,45 @@ For each story, write a DNN brief in the 1927 Parallel style. Return JSON:
           }
         }
       }
-    });
-
-    const briefs = res?.briefs || [];
-    for (const brief of briefs) {
-      await appClient.entities.DnnArticle.create({
-        headline: brief.headline,
-        dateline: brief.dateline,
-        body: brief.body,
-        tags: brief.tags || [],
-        trigger_type: brief.trigger_type,
-        status: 'staged',
-        generated_date: new Date().toISOString(),
       });
+      const res = await Promise.race([
+        request,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('The news scan took too long. Please try again.')), 75_000)),
+      ]);
+
+      const briefs = res?.briefs || [];
+      for (const brief of briefs) {
+        await appClient.entities.DnnArticle.create({
+          headline: brief.headline,
+          dateline: brief.dateline,
+          body: brief.body,
+          tags: brief.tags || [],
+          trigger_type: brief.trigger_type,
+          status: 'staged',
+          generated_date: new Date().toISOString(),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['dnnArticles'] });
+    } catch (error) {
+      setGenerationError(error?.message || 'The news scan could not be completed.');
+    } finally {
+      setGenerating(false);
     }
-    queryClient.invalidateQueries({ queryKey: ['dnnArticles'] });
-    setGenerating(false);
+  };
+
+  const handleRestoreLiveFeed = async () => {
+    setRestoring(true);
+    setGenerationError('');
+    try {
+      const existingHeadlines = new Set(articles.map((article) => article.headline));
+      const missing = DNN_REVIEW_FEED_ITEMS.filter((article) => !existingHeadlines.has(article.headline));
+      if (missing.length) await appClient.entities.DnnArticle.bulkCreate(missing);
+      await queryClient.invalidateQueries({ queryKey: ['dnnArticles'] });
+    } catch (error) {
+      setGenerationError(error?.message || 'The starter feed could not be restored.');
+    } finally {
+      setRestoring(false);
+    }
   };
 
   const handleBlast = async () => {
@@ -152,17 +180,35 @@ For each story, write a DNN brief in the 1927 Parallel style. Return JSON:
             <h1 className="text-2xl font-black text-white">News Feed — Staging</h1>
             <p className="text-sm text-slate-400 mt-1">AI-generated briefs in review. Approve before pushing live.</p>
           </div>
-          <Button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="gap-2 font-bold"
-            style={{ background: 'linear-gradient(135deg, #e8c84a, #D4AF37, #b8920a)', color: '#000' }}
-          >
-            {generating
-              ? <><RefreshCw className="w-4 h-4 animate-spin" />Scanning web...</>
-              : <><Sparkles className="w-4 h-4" />Generate Today's Briefs</>}
-          </Button>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              onClick={handleRestoreLiveFeed}
+              disabled={restoring || generating}
+              variant="outline"
+              className="gap-2 font-bold border-yellow-700 text-yellow-300"
+            >
+              {restoring
+                ? <><RefreshCw className="w-4 h-4 animate-spin" />Restoring...</>
+                : <><Globe className="w-4 h-4" />Restore Live Feed</>}
+            </Button>
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || restoring}
+              className="gap-2 font-bold"
+              style={{ background: 'linear-gradient(135deg, #e8c84a, #D4AF37, #b8920a)', color: '#000' }}
+            >
+              {generating
+                ? <><RefreshCw className="w-4 h-4 animate-spin" />Scanning web...</>
+                : <><Sparkles className="w-4 h-4" />Generate Today's Briefs</>}
+            </Button>
+          </div>
         </div>
+
+        {generationError && (
+          <div className="mb-6 rounded-xl border border-red-800 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+            {generationError}
+          </div>
+        )}
 
         {generating && (
           <div className="mb-6 rounded-xl border p-4 flex items-center gap-3" style={{ background: 'rgba(212,175,55,0.07)', borderColor: 'rgba(212,175,55,0.2)' }}>

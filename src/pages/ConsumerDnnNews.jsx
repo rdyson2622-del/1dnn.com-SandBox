@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { appClient } from '@/api/appClient';
 import { Globe, Bell, Share2, BookOpen, TrendingUp, Shield, DollarSign, ChevronRight, Mail, MessageSquare, Copy, Check, X, Headphones } from 'lucide-react';
@@ -480,11 +480,17 @@ export default function ConsumerDnnNews() {
   const [editForm, setEditForm] = useState({});
   const [savingEdit, setSavingEdit] = useState(false);
   const [readingArticle, setReadingArticle] = useState(null);
+  const [destinationMarket, setDestinationMarket] = useState(() => new URLSearchParams(window.location.search).get('market') || localStorage.getItem('dnn_destination_market') || '');
   const queryClient = useQueryClient();
 
   useEffect(() => {
     appClient.auth.me().then(user => {
       if (user?.role === 'admin') setIsAdmin(true);
+      const savedMarket = user?.destination_city || user?.destination_market;
+      if (savedMarket) {
+        localStorage.setItem('dnn_destination_market', savedMarket);
+        setDestinationMarket(savedMarket);
+      }
     }).catch(() => {});
   }, []);
 
@@ -534,9 +540,22 @@ export default function ConsumerDnnNews() {
     queryFn: () => appClient.entities.DnnArticle.filter({ status: 'blasted' }, '-generated_date', 50),
   });
 
-  const allArticles = [...articles, ...blasted].sort((a, b) =>
-    new Date(b.generated_date || b.created_date) - new Date(a.generated_date || a.created_date)
-  );
+  const allArticles = useMemo(() => {
+    const market = destinationMarket.split(',')[0].trim().toLowerCase();
+    const marketRank = (article) => {
+      if (!market) return article.scope === 'national' ? 1 : 0;
+      const searchable = [article.dateline, article.headline, ...(article.tags || [])].join(' ').toLowerCase();
+      if (article.scope === 'local' && searchable.includes(market)) return 0;
+      if (article.scope === 'national') return 1;
+      return 2;
+    };
+
+    return [...articles, ...blasted].sort((a, b) => {
+      const rankDifference = marketRank(a) - marketRank(b);
+      if (rankDifference) return rankDifference;
+      return new Date(b.generated_date || b.created_date) - new Date(a.generated_date || a.created_date);
+    });
+  }, [articles, blasted, destinationMarket]);
 
   const textArticles = allArticles;
 
@@ -614,7 +633,9 @@ export default function ConsumerDnnNews() {
 
             {/* Text briefs — flex-1 to fill available space */}
             <div className="flex-1 min-w-0 space-y-3">
-              <p className="text-sm font-black tracking-[0.2em] uppercase px-3 py-2 text-center" style={{ color: '#1a1a1a' }}>News Briefs</p>
+              <p className="text-sm font-black tracking-[0.2em] uppercase px-3 py-2 text-center" style={{ color: '#1a1a1a' }}>
+                {destinationMarket ? `${destinationMarket.split(',')[0]} News + National Briefs` : 'News Briefs'}
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {textArticles.map(article => (
                   <div key={article.id} className="relative">
