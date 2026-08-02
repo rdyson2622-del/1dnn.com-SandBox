@@ -47,6 +47,16 @@ export default function ChatBubble({ message }) {
               strong: ({ children }) => <strong style={{ color: '#D4AF37' }}>{children}</strong>,
               ul: ({ children }) => <ul className="my-1 ml-3 list-disc text-gray-300">{children}</ul>,
               li: ({ children }) => <li className="my-0.5">{children}</li>,
+              a: ({ href, children }) => (
+                <a
+                  href={href}
+                  className="font-bold underline underline-offset-2"
+                  style={{ color: '#D4AF37' }}
+                  aria-label={`${children} — book a call with Bob`}
+                >
+                  {children}
+                </a>
+              ),
             }}
           >
             {message.content}

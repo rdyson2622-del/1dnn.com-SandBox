@@ -55,10 +55,11 @@ export default function RelocationIntake() {
   const searchParams = new URLSearchParams(window.location.search);
   const clientName = searchParams.get('name');
   const destination = searchParams.get('destination');
+  const openBookingCalendar = searchParams.get('book') === '1';
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [showScheduler, setShowScheduler] = useState(false);
+  const [showScheduler, setShowScheduler] = useState(openBookingCalendar);
   const [showAgreement, setShowAgreement] = useState(false);
   const [agreedItems, setAgreedItems] = useState([]);
   const [signTiming, setSignTiming] = useState(null); // 'now' or 'after'

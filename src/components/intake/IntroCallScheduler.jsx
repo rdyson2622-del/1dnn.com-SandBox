@@ -79,7 +79,7 @@ export default function IntroCallScheduler({ form, onBack, onScheduled }) {
         <h2 className="font-bold" style={{ color: '#fff', fontSize: '2rem' }}>Let's Talk First</h2>
       </div>
       <p className="mb-6" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem' }}>
-        Before you commit to anything, let's have a real conversation. Pick a 15-minute slot — Bob Dyson's team will call you personally.
+        Before you commit to anything, let's have a real conversation. Pick a 15-minute slot — Bob Dyson will call you personally.
       </p>
 
       {/* Who's calling */}
@@ -88,9 +88,9 @@ export default function IntroCallScheduler({ form, onBack, onScheduled }) {
         <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold"
           style={{ background: GOLD, color: '#000' }}>BD</div>
         <div>
-          <p className="font-bold" style={{ color: '#fff', fontSize: '1rem' }}>Bob Dyson's Team • 15-Min Intro Call</p>
+          <p className="font-bold" style={{ color: '#fff', fontSize: '1rem' }}>Bob Dyson • 15-Min Intro Call</p>
           <p className="mt-0.5" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>
-            We'll call <span style={{ color: GOLD }}>(858) 353-1200</span> — no pressure, just answers.
+            Questions before booking? Call Bob at <span style={{ color: GOLD }}>(858) 353-1200</span>.
           </p>
         </div>
       </div>

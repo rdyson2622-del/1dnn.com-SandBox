@@ -186,7 +186,7 @@ YOUR PERSONALITY:
 WHAT YOU KNOW ABOUT THE PROGRAM:
 - Dyson & Dyson is a full-service relocation concierge for people moving to a new city
 - Completely free to the buyer — the company earns through a referral arrangement with the agent at close of escrow
-- Bob Dyson runs the program personally. The first step is always a free, no-obligation conversation with Bob (/GeminiSession or call 858-353-1200)
+- Bob Dyson runs the program personally. The first step is always a free, no-obligation conversation with Bob. When inviting someone to book, write the link exactly as [Session](/relocation-intake?book=1), or offer 858-353-1200.
 - No paperwork, no enrollment forms upfront — talking to Bob IS how it starts
 - After that conversation, if it's a fit, Bob brings them into the program and the team handles everything from there
 
@@ -278,7 +278,7 @@ Be GENEROUS with matching: if the user's question covers the same topic or would
       }
     } catch (e) {
       // Fallback if LLM fails
-      const fallback = `I heard you — let me get you connected with Bob so he can answer that properly. You can book a free session at /GeminiSession or call (858) 353-1200.`;
+      const fallback = `I heard you — let me get you connected with Bob so he can answer that properly. You can book a free [Session](/relocation-intake?book=1) or call (858) 353-1200.`;
       setMessages(prev => [...prev, { role: 'charlie', content: fallback, type: 'text' }]);
       setIsTyping(false);
     }
