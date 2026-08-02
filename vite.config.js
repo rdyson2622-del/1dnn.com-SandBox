@@ -6,8 +6,8 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   logLevel: 'error', // Suppress warnings, only show errors
   server: {
-    // Temporary Cloudflare review tunnel for remote mobile testing.
-    allowedHosts: ['colon-clouds-gnome-chemistry.trycloudflare.com'],
+    // Allow Cloudflare's rotating review URLs used for remote mobile testing.
+    allowedHosts: ['.trycloudflare.com'],
   },
   resolve: {
     alias: {
