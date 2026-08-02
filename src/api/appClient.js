@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { DNN_LOCAL_SEED_RECORDS } from '@/data/dnnSeedRecords';
+import { DNN_BROADCAST_VIDEO_URL } from '@/config/media';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -38,12 +39,18 @@ const writeLocal = (records) => {
   window.dispatchEvent(new CustomEvent('dnn-records-changed'));
 };
 
-const fromRow = (row) => ({
-  ...(row.data || {}),
-  id: row.id,
-  created_date: row.created_at,
-  updated_date: row.updated_at,
-});
+const fromRow = (row) => {
+  const record = { ...(row.data || {}) };
+  if (record.video_url === '/assets/dnn-broadcast-4k.mp4') {
+    record.video_url = DNN_BROADCAST_VIDEO_URL;
+  }
+  return {
+    ...record,
+    id: row.id,
+    created_date: row.created_at,
+    updated_date: row.updated_at,
+  };
+};
 
 const localEntity = (entity) => ({
   async list(sort, limit = 5000) {

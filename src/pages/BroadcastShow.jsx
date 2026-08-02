@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, X } from 'lucide-react';
+import { DNN_BROADCAST_VIDEO_URL } from '@/config/media';
 
 const GOLD = '#D4AF37';
-const BROADCAST_VIDEO = '/assets/dnn-broadcast-4k.mp4';
+const BROADCAST_VIDEO = DNN_BROADCAST_VIDEO_URL;
 
 export default function BroadcastShow() {
   const videoRef = useRef(null);

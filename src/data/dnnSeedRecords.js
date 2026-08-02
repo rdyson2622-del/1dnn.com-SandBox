@@ -1,3 +1,5 @@
+import { DNN_BROADCAST_THUMBNAIL_URL, DNN_BROADCAST_VIDEO_URL } from '@/config/media';
+
 const seededAt = '2026-07-31T17:08:15.136Z';
 
 const article = (id, data, createdAt = seededAt) => ({
@@ -153,8 +155,8 @@ export const DNN_LOCAL_SEED_RECORDS = [
     headline: 'DNN Real Estate News — 4K Daily Broadcast',
     dateline: 'DNN NEWS —',
     body: 'Charlie Simmons and Bob Dyson deliver the DNN real estate news broadcast in the new studio presentation.',
-    video_url: '/assets/dnn-broadcast-4k.mp4',
-    thumbnail_url: '/assets/dnn-studio.png',
+    video_url: DNN_BROADCAST_VIDEO_URL,
+    thumbnail_url: DNN_BROADCAST_THUMBNAIL_URL,
     production_status: 'complete',
     tags: ['DNN', 'Real Estate News', '4K Broadcast', 'featured'],
     trigger_type: 'housing_market',

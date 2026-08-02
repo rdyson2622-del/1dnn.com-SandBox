@@ -276,7 +276,7 @@ export default function Home() {
               <div className="rounded-2xl overflow-hidden mb-8" style={{ background: '#000', border: '1px solid rgba(212,175,55,0.3)' }}>
                 <p className="text-xs font-black tracking-[0.25em] uppercase mb-3 px-4 pt-4" style={{ color: GOLD }}>▶ WATCH THE WINDEANS' STORY</p>
                 <video
-                  src="/assets/move-story.mp4"
+                  src="/assets/move-story-web.m4v"
                   controls
                   playsInline
                   preload="metadata"
