@@ -4,6 +4,44 @@ import { Play, Pause, Volume2, VolumeX, RotateCcw, X } from 'lucide-react';
 
 const GOLD = '#D4AF37';
 
+// Ruben is the on-camera presenter behind the Charlie page-guide experience.
+// These clips were migrated from the original Base44 media library so the
+// independent site does not depend on Base44 URLs at runtime.
+const RUBEN_PAGE_PRESENTERS = {
+  'relocation-services': {
+    videoUrl: '/assets/ruben-relocation-services.mp4',
+    thumbnailUrl: '/assets/ruben-relocation-services.jpg',
+  },
+  'client-home': {
+    videoUrl: '/assets/ruben-client-home.mp4',
+    thumbnailUrl: '/assets/ruben-client-home.jpg',
+  },
+  'gemini-session': {
+    videoUrl: '/assets/ruben-gemini-session.mp4',
+    thumbnailUrl: '/assets/ruben-gemini-session.jpg',
+  },
+  'corporate-relo': {
+    videoUrl: '/assets/ruben-corporate-relo.mp4',
+    thumbnailUrl: '/assets/ruben-corporate-relo.jpg',
+  },
+  'portal-client': {
+    videoUrl: '/assets/ruben-portal-client.mp4',
+    thumbnailUrl: '/assets/ruben-portal-client.jpg',
+  },
+  'portal-relocation-agent': {
+    videoUrl: '/assets/ruben-portal-relocation-agent.mp4',
+    thumbnailUrl: '/assets/ruben-portal-relocation-agent.jpg',
+  },
+  'portal-referral-agent': {
+    videoUrl: '/assets/ruben-portal-referral-agent.mp4',
+    thumbnailUrl: '/assets/ruben-portal-referral-agent.jpg',
+  },
+  'portal-vendor': {
+    videoUrl: '/assets/ruben-portal-vendor.mp4',
+    thumbnailUrl: '/assets/ruben-portal-vendor.jpg',
+  },
+};
+
 /**
  * CharliePagePresenter — Shard2 in-app presentation layer.
  *
@@ -40,7 +78,11 @@ export default function CharliePagePresenter({ pageKey, topOffsetClass, inline =
 
   // Prefer the Charlie-only presenter clip; the composed full-screen video
   // (finalVideoUrl) is a demo/render artifact and is NOT shown in the widget.
-  const presenterSrc = explainer?.renderStatus === 'completed' ? explainer?.presenterVideoUrl : null;
+  const localPresenter = RUBEN_PAGE_PRESENTERS[pageKey];
+  const presenterSrc = explainer?.renderStatus === 'completed' && explainer?.presenterVideoUrl
+    ? explainer.presenterVideoUrl
+    : localPresenter?.videoUrl;
+  const presenterThumbnail = explainer?.thumbnailUrl || localPresenter?.thumbnailUrl;
   const hasVideo = Boolean(presenterSrc);
 
   const openAndSpeak = () => {
@@ -108,10 +150,10 @@ export default function CharliePagePresenter({ pageKey, topOffsetClass, inline =
       >
         <span className="absolute inset-0 rounded-full overflow-hidden shadow-xl"
           style={{ background: '#0d0d0d', border: `3px solid ${GOLD}` }}>
-          {explainer?.thumbnailUrl ? (
+          {presenterThumbnail ? (
             <img
-              src={explainer.thumbnailUrl}
-              alt="Charlie — Dyson AI Concierge"
+              src={presenterThumbnail}
+              alt="Ruben — Charlie page presenter"
               className="w-full h-full object-cover pointer-events-none"
             />
           ) : hasVideo ? (
@@ -125,7 +167,11 @@ export default function CharliePagePresenter({ pageKey, topOffsetClass, inline =
               className="w-full h-full object-cover pointer-events-none"
             />
           ) : (
-            <span className="w-full h-full flex items-center justify-center text-4xl">🎩</span>
+            <img
+              src="/assets/ruben-client-home.jpg"
+              alt="Ruben — Charlie page presenter"
+              className="w-full h-full object-cover pointer-events-none"
+            />
           )}
         </span>
         {/* Play badge */}
@@ -211,16 +257,21 @@ export default function CharliePagePresenter({ pageKey, topOffsetClass, inline =
             </div>
           </>
         ) : (
-          /* Fallback: no completed video yet */
-          <div className="px-4 py-5 flex flex-col items-center text-center gap-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-              style={{ background: 'rgba(212,175,55,0.15)', border: `1px solid ${GOLD}` }}>
-              🎩
+          /* Ruben remains visible even before a page-specific video is available. */
+          <div className="flex flex-col items-center text-center">
+            <div className="w-full overflow-hidden" style={{ height: 170, background: '#0d0d0d' }}>
+              <img
+                src="/assets/ruben-client-home.jpg"
+                alt="Ruben — Charlie page presenter"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <p className="text-xs font-bold text-white">Charlie overview coming soon</p>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              A short video walkthrough of this page is on its way.
-            </p>
+            <div className="w-full px-3 py-3" style={{ background: '#262626', borderTop: '1px solid rgba(212,175,55,0.2)' }}>
+              <p className="text-xs font-bold text-white">Meet Charlie</p>
+              <p className="text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                Your Dyson AI relocation concierge
+              </p>
+            </div>
           </div>
         )}
       </div>
